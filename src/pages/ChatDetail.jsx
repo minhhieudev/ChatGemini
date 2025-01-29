@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import ImgTemp from "../assets/temp.jpeg";
 import IconMenu from "../assets/menu.png";
@@ -27,6 +27,7 @@ const ChatDetail = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -37,6 +38,22 @@ const ChatDetail = () => {
       }
     }
   }, [data, id]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setMenuToggle(false);
+      }
+    };
+
+    if (menuToggle) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuToggle]);
 
   const handleChatDetail = async () => {
     if (!inputChat.trim()) return;
@@ -138,8 +155,19 @@ const ChatDetail = () => {
       </div>
 
       {menuToggle && (
-        <div className="absolute top-0 left-0 h-full z-50 xl:hidden">
-          <SideBar onToggle={() => setMenuToggle(!menuToggle)} />
+        <div className="fixed inset-0 z-50 xl:hidden">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 transition-opacity"
+            onClick={() => setMenuToggle(false)}
+          />
+          {/* Sidebar */}
+          <div 
+            ref={sidebarRef}
+            className="relative w-[280px] h-full"
+          >
+            <SideBar onToggle={() => setMenuToggle(false)} />
+          </div>
         </div>
       )}
 
