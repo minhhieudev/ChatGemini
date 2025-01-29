@@ -9,11 +9,26 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
+import ChatDetail from "./pages/ChatDetail.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/chat/info" />,
+      },
+      {
+        path: "/chat/info",
+        element: <ChatDetail />,
+      },
+      {
+        path: "/chat/:id",
+        element: <ChatDetail />,
+      },
+    ]
   },
 ]);
 
