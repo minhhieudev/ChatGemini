@@ -31,15 +31,15 @@ const SideBar = ({ onToggle }) => {
       isDarkMode ? 'bg-primaryBg-sideBar-dark text-white' : 'bg-primaryBg-sideBar-light text-gray-800'
     }`}>
       <div className="flex justify-between items-center">
-        <button className="xl:hidden" onClick={onToggle}>
-          <img src={IconMenu} alt="menu icon" className="w-10 h-10" />
+        <button className="xl:hidden hover:opacity-80 transition-opacity" onClick={onToggle}>
+          <img src={IconMenu} alt="menu icon" className="w-8 h-8" />
         </button>
         <button 
           onClick={toggleTheme}
-          className={`p-2 rounded-lg ${
+          className={`p-2 rounded-lg transition-colors duration-200 ${
             isDarkMode 
-              ? 'bg-gray-700 hover:bg-gray-600' 
-              : 'bg-gray-200 hover:bg-gray-300'
+              ? 'bg-white hover:bg-gray-200' 
+              : 'bg-gray-400 hover:bg-gray-500'
           }`}
         >
           {isDarkMode ? '🌞' : '🌙'}
@@ -47,34 +47,54 @@ const SideBar = ({ onToggle }) => {
       </div>
       <div className="mt-20 flex flex-col h-full">
         <button
-          className={`px-4 py-2 flex items-center space-x-4 ${
-            isDarkMode ? 'bg-gray-600 text-white' : 'bg-gray-200 text-gray-800'
+          className={`px-4 py-3 flex items-center space-x-4 rounded-lg transition-colors duration-200 ${
+            isDarkMode 
+              ? 'bg-gray-700 text-white hover:bg-gray-600' 
+              : 'bg-gray-300 text-gray-800 hover:bg-gray-400'
           } mb-10`}
           onClick={handleNewChat}
         >
-          <img src={IconPlus} alt="plus icon" className="w-4 h-4" />
-          <p className="font-semibold">Cuộc trò truyện mới</p>
+          <img src={IconPlus} alt="plus icon" className="w-5 h-5" />
+          <p className="font-medium">Cuộc trò truyện mới</p>
         </button>
         <div className="space-y-4 flex-1 overflow-hidden">
-          <p className="font-bold">Gần đây:</p>
-          <div className="flex flex-col space-y-6 overflow-y-auto h-[calc(100vh-280px)]">
+          <p className="font-bold text-lg px-2">Gần đây:</p>
+          <div className="flex flex-col space-y-3 overflow-y-auto h-[calc(100vh-280px)] pr-2">
             {data.map((chat) => (
               <div key={chat.id}>
                 <Link
                   to={`/chat/${chat.id}`}
-                  className={`flex items-center justify-between p-2 rounded-lg ${
-                    isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-300 text-gray-800'
+                  className={`flex items-center justify-between p-2 rounded-lg transition-colors duration-200 ${
+                    isDarkMode 
+                      ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                      : 'bg-gray-300 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <div className="flex items-center space-x-4">
-                    <img src={IconChat} alt="chat icon" className="w-8 h-8" />
-                    <p>{chat.title}</p>
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg ${
+                      isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                    }`}>
+                      <img src={IconChat} alt="chat icon" className="w-5 h-5" />
+                    </div>
+                    <p className="font-medium truncate max-w-[150px]">{chat.title}</p>
                   </div>
-                  <button onClick={(e) => {
-                    e.preventDefault();
-                    handleRemoveChat(chat.id);  
-                  }}>
-                    <img src={IconTrash} alt="chat icon" className="w-5 h-5" />
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleRemoveChat(chat.id);  
+                    }}
+                    className={`p-2 rounded-lg transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'hover:bg-red-900/50' 
+                        : 'hover:bg-red-100'
+                    }`}
+                  >
+                    <img 
+                      src={IconTrash} 
+                      alt="delete chat" 
+                      className="w-5 h-5 transition-colors duration-200 filter hover:brightness-125"
+                      style={{ filter: 'invert(22%) sepia(96%) saturate(5054%) hue-rotate(353deg) brightness(98%) contrast(93%)' }}
+                    />
                   </button>
                 </Link>
               </div>

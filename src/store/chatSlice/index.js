@@ -61,11 +61,35 @@ const ChatSlice = createSlice({
             if(chat){
                 chat.title = newTitle;
             }
-        }
+        },
+        addUserMessage: (state, action) => {
+            const {idChat, userMess} = action.payload;
+            const chat = state.data.find((chat) => chat.id === idChat);
+            if(chat){
+                chat.messages.push({
+                    id: uuidv4(),
+                    text: userMess,
+                    isBot: false
+                });
+            }
+        },
+        addBotMessage: (state, action) => {
+            const {idChat, botMess} = action.payload;
+            const chat = state.data.find((chat) => chat.id === idChat);
+            if(chat){
+                const messageFormat = marked.parse(botMess);
+                const safeChat = DOMPurify.sanitize(messageFormat);
+                chat.messages.push({
+                    id: uuidv4(),
+                    text: safeChat,
+                    isBot: true
+                });
+            }
+        },
     }
 })
 
-export const { addChat, removeChat, addMessage, setNameChat } = ChatSlice.actions;
+export const { addChat, removeChat, addMessage, setNameChat, addUserMessage, addBotMessage } = ChatSlice.actions;
 
 
 export default ChatSlice.reducer;
