@@ -1,14 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import store from "./store/app.js";
-import "./index.css";
-import App from './App.jsx'
-import { Provider } from "react-redux";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
 import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
 } from "react-router-dom";
+import { Provider } from "react-redux";
+import store from "./store/app.js";
+import "./index.css";
 import ChatDetail from "./pages/ChatDetail.jsx";
 
 const router = createBrowserRouter([
@@ -28,14 +28,14 @@ const router = createBrowserRouter([
         path: "/chat/:id",
         element: <ChatDetail />,
       },
-    ]
+    ],
   },
 ]);
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
     <Provider store={store}>
       <RouterProvider router={router} />
     </Provider>
-  </StrictMode>,
-)
+  </React.StrictMode>
+);
