@@ -45,7 +45,7 @@ import {GoogleGenerativeAI,
     });
   
     const result = await chatSession.sendMessage(textInput);
-    console.log(result.response.text())
+    //console.log(result.response.text())
     return result.response.text()
   }
   

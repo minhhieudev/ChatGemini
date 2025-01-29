@@ -8,6 +8,7 @@ import Gemini from "../gemini";
 import { useDispatch, useSelector } from "react-redux";
 import { addMessage, setNameChat, addChat } from "../store/chatSlice";
 import { v4 as uuidv4 } from "uuid";
+import { useTheme } from "../context/ThemeContext";
 
 const ChatDetail = () => {
   const [menuToggle, setMenuToggle] = useState(true);
@@ -18,13 +19,14 @@ const ChatDetail = () => {
   const { data } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
-    if (data.length > 0) {
+    if (data && data.length > 0) {
       const chat = data.find((chat) => chat.id === id);
       if (chat) {
         setDataDetail(chat);
-        setMessageDetail(chat.messages)
+        setMessageDetail(chat.messages || []);
       }
     }
   }, [data, id]);
@@ -48,34 +50,45 @@ const ChatDetail = () => {
         setInputChat("");
       }
     } else {
-      const newChatId = uuidv4();
-      dispatch(addChat(newChatId));
-      
-      navigate(`/chat/${newChatId}`);
-      const chatText = await Gemini(inputChat, []);
-      if (chatText) {
-        const dataMessage = {
-          idChat: newChatId,
-          userMess: inputChat,
-          botMess: chatText,
-        };
-        dispatch(addMessage(dataMessage));
-        setInputChat("");
-        
-        const promptName = `This is a new chat, and user ask about ${inputChat}. No rely and comment just give me a name for this chat, Max length is 10 characters`;
-        const newTitle = await Gemini(promptName)
-        dispatch(setNameChat({newTitle, chatId: newChatId}))
+      dispatch(addChat());
+      const newChat = data[data.length - 1];
+      console.log(data)
+      if (newChat) {
+        navigate(`/chat/${newChat.id}`);
+        const chatText = await Gemini(inputChat, []);
+        if (chatText) {
+          const dataMessage = {
+            idChat: newChat.id,
+            userMess: inputChat,
+            botMess: chatText,
+          };
+          dispatch(addMessage(dataMessage));
+          setInputChat("");
+          
+          const promptName = `This is a new chat, and user ask about ${inputChat}. No rely and comment just give me a name for this chat, Max length is 10 characters`;
+          const newTitle = await Gemini(promptName)
+          dispatch(setNameChat({newTitle, chatId: newChat.id}))
+        }
       }
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleChatDetail();
+    }
+  };
+
   return (
-    <div className="text-white xl:w-[80%] w-full relative">
+    <div className={`text-white xl:w-[80%] w-full relative ${
+      isDarkMode ? 'text-white' : 'text-gray-800'
+    }`}>
       <div className="flex items-center space-x-2 p-4">
         <button onClick={() => setMenuToggle(!menuToggle)}>
           <img src={IconMenu} alt="menu icon" className="w-8 h-8 xl:hidden" />
         </button>
-        <h1 className="text-xl uppercase font-bold ">Gemini</h1>
+        <h1 className="text-xl uppercase font-bold">Gemini</h1>
       </div>
       {menuToggle && (
         <div className="absolute h-full top-0 left-0 xl:hidden">
@@ -92,12 +105,15 @@ const ChatDetail = () => {
                     {item.isBot ? (
                       <>
                         <img src={IconStar} alt="star" className="w-8 h-8" />
-                        <p dangerouslySetInnerHTML={{ __html: item.text }} />
+                        <p className={isDarkMode ? 'text-white' : 'text-gray-800'} 
+                           dangerouslySetInnerHTML={{ __html: item.text }} />
                       </>
                     ) : (
                       <>
                         <p>User</p>
-                        <p>{item.text}</p>
+                        <p className={isDarkMode ? 'text-white' : 'text-gray-800'}>
+                          {item.text}
+                        </p>
                       </>
                     )}
                   </div>
@@ -107,22 +123,32 @@ const ChatDetail = () => {
         ) : (
           <div className="flex flex-col space-y-5">
             <div className="space-y-1">
-              <h2 className="bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 text-[30px] inline-block text-transparent bg-clip-text font-bold ">
+              <h2 className="bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 text-[30px] inline-block text-transparent bg-clip-text font-bold">
                 Xin Chào
               </h2>
-              <p className="text-3xl">Hôm nay tôi có thể giúp gì cho bạn</p>
+              <p className={`text-3xl ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>Hôm nay tôi có thể giúp gì cho bạn</p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-[200px] h-[200px] bg-primaryBg-sideBar flex items-center justify-center rounded-lg">
+              <div className={`w-[200px] h-[200px] flex items-center justify-center rounded-lg ${
+                isDarkMode ? 'bg-primaryBg-sideBar-dark text-white' : 'bg-gray-100 text-gray-800'
+              }`}>
                 <p>Lên kế hoạch bữa ăn</p>
               </div>
-              <div className="w-[200px] h-[200px] bg-primaryBg-sideBar flex items-center justify-center rounded-lg">
+              <div className={`w-[200px] h-[200px] flex items-center justify-center rounded-lg ${
+                isDarkMode ? 'bg-primaryBg-sideBar-dark text-white' : 'bg-gray-100 text-gray-800'
+              }`}>
                 <p>Cụm từ ngôn ngữ mới</p>
               </div>
-              <div className="w-[200px] h-[200px] bg-primaryBg-sideBar flex items-center justify-center rounded-lg">
+              <div className={`w-[200px] h-[200px] flex items-center justify-center rounded-lg ${
+                isDarkMode ? 'bg-primaryBg-sideBar-dark text-white' : 'bg-gray-100 text-gray-800'
+              }`}>
                 <p>Bí quyết viết thư xin việc</p>
               </div>
-              <div className="w-[200px] h-[200px] bg-primaryBg-sideBar flex items-center justify-center rounded-lg flex-col">
+              <div className={`w-[200px] h-[200px] flex items-center justify-center rounded-lg flex-col ${
+                isDarkMode ? 'bg-primaryBg-sideBar-dark text-white' : 'bg-gray-100 text-gray-800'
+              }`}>
                 <p>Tạo hình ảnh với AI</p>
                 <img src={ImgTemp} alt="temp" className="w-[150px] h-[150px]" />
               </div>
@@ -134,8 +160,13 @@ const ChatDetail = () => {
             type="text"
             value={inputChat}
             placeholder="Nhập câu lệnh tại đây"
-            className="p-4 rounded-lg bg-primaryBg-default w-[90%] border"
+            className={`p-4 rounded-lg w-[90%] border ${
+              isDarkMode 
+                ? 'bg-primaryBg-default-dark text-white border-gray-700' 
+                : 'bg-white text-gray-800 border-gray-300'
+            }`}
             onChange={(e) => setInputChat(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <button
             className="p-4 rounded-lg bg-green-500 text-white"

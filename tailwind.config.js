@@ -8,8 +8,14 @@ export default {
       extend: {
         colors:{
           primaryBg: {
-            default: '#131314',
-            sideBar: '#1e1f20'
+            default: {
+              dark: '#131314',
+              light: '#ffffff'
+            },
+            sideBar: {
+              dark: '#1e1f20',
+              light: '#f1f1f1'
+            }
           }
         }
       },
