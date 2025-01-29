@@ -29,9 +29,9 @@ const ChatSlice = createSlice({
     name: 'chat',
     initialState: initData,
     reducers:{
-        addChat: (state) =>{
+        addChat: (state, action) => {
             state.data.push({
-                id: uuidv4(),
+                id: action.payload,
                 title: 'Chat',
                 messages: []
             })

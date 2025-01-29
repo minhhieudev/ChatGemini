@@ -6,6 +6,7 @@ import IconMenu from "../assets/menu.png";
 import { useDispatch, useSelector } from "react-redux";
 import { addChat, removeChat } from "../store/chatSlice";
 import { Link, useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
 
 const SideBar = ({ onToggle }) => {
   const dispatch = useDispatch();
@@ -13,7 +14,9 @@ const SideBar = ({ onToggle }) => {
   const navigate = useNavigate();
 
   const handleNewChat = () => {
-    dispatch(addChat());
+    const newChatId = uuidv4();
+    dispatch(addChat(newChatId));
+    navigate(`/chat/${newChatId}`);
   };
 
   const handleRemoveChat = (id) => {

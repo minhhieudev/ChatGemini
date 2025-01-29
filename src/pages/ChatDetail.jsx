@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ImgTemp from "../assets/temp.jpeg";
 import IconMenu from "../assets/menu.png";
 import SideBar from "../components/SideBar";
 import IconStar from "../assets/star.png";
 import Gemini from "../gemini";
 import { useDispatch, useSelector } from "react-redux";
-import { addMessage, setNameChat } from "../store/chatSlice";
+import { addMessage, setNameChat, addChat } from "../store/chatSlice";
+import { v4 as uuidv4 } from "uuid";
 
 const ChatDetail = () => {
   const [menuToggle, setMenuToggle] = useState(true);
@@ -16,6 +17,7 @@ const ChatDetail = () => {
   const { id } = useParams();
   const { data } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (data.length > 0) {
@@ -44,6 +46,25 @@ const ChatDetail = () => {
 
         dispatch(addMessage(dataMessage));
         setInputChat("");
+      }
+    } else {
+      const newChatId = uuidv4();
+      dispatch(addChat(newChatId));
+      
+      navigate(`/chat/${newChatId}`);
+      const chatText = await Gemini(inputChat, []);
+      if (chatText) {
+        const dataMessage = {
+          idChat: newChatId,
+          userMess: inputChat,
+          botMess: chatText,
+        };
+        dispatch(addMessage(dataMessage));
+        setInputChat("");
+        
+        const promptName = `This is a new chat, and user ask about ${inputChat}. No rely and comment just give me a name for this chat, Max length is 10 characters`;
+        const newTitle = await Gemini(promptName)
+        dispatch(setNameChat({newTitle, chatId: newChatId}))
       }
     }
   };
