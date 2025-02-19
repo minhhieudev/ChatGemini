@@ -149,7 +149,7 @@ const ChatDetail = () => {
           <SiOpenai className="w-8 h-8 text-blue-500" />
           <h1 className="text-xl font-bold tracking-wide bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
             {/* Gemini AI Chat with minhhieudev */}
-            Gemini AI Chat 
+            Gemini AI Chat By minhhieudev
           </h1>
         </Link>
       </div>
