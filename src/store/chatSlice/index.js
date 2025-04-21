@@ -59,7 +59,7 @@ const ChatSlice = createSlice({
             const {newTitle, chatId} = action.payload;
             const chat = state.data.find((chat) => chat.id === chatId)
             if(chat){
-                chat.title = newTitle;
+                chat.title = typeof newTitle === 'string' ? newTitle : 'Chat';
             }
         },
         addUserMessage: (state, action) => {

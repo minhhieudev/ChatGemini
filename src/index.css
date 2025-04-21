@@ -1,3 +1,79 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Thêm những quy tắc này */
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7);
+}
+
+/* Fix for Tailwind typography plugin + dark mode */
+.dark .prose {
+  color: #e5e7eb;
+}
+
+.dark .prose a {
+  color: #93c5fd;
+}
+
+.dark .prose strong {
+  color: #f3f4f6;
+}
+
+.dark .prose h1, 
+.dark .prose h2, 
+.dark .prose h3, 
+.dark .prose h4 {
+  color: #f9fafb;
+}
+
+.dark .prose code {
+  color: #d1d5db;
+  background: rgba(31, 41, 55, 0.5);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+}
+
+.dark .prose pre {
+  background-color: #1f2937;
+}
+
+.dark .prose blockquote {
+  color: #d1d5db;
+  border-color: rgba(75, 85, 99, 0.5);
+}
+
+.dark .prose hr {
+  border-color: rgba(75, 85, 99, 0.5);
+}
+
+.dark .prose thead {
+  color: #f3f4f6;
+  border-color: rgba(75, 85, 99, 0.7);
+}
+
+.dark .prose tbody tr {
+  border-color: rgba(75, 85, 99, 0.5);
+}
