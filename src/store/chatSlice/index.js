@@ -72,10 +72,12 @@ const ChatSlice = createSlice({
         },
         addBotMessage: (state, action) => {
             const {idChat, botMess} = action.payload;
+            console.log("addBotMessage reducer called with:", action.payload);
             const chat = state.data.find((chat) => chat.id === idChat);
             if(chat){
                 const messageFormat = marked.parse(botMess);
                 const safeChat = DOMPurify.sanitize(messageFormat);
+                console.log("Formatted message:", safeChat);
                 chat.messages.push({
                     id: uuidv4(),
                     text: safeChat,

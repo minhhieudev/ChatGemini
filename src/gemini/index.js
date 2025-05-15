@@ -14,7 +14,13 @@ import DOMPurify from 'dompurify';
 import { marked } from 'marked';
   
 const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
+
+// Simplify warning message
+if (!apiKey) {
+  console.warn("⚠️ VITE_GOOGLE_API_KEY is missing. Create a .env file with your Google API key.");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey || "dummy-key");
 
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
@@ -207,19 +213,46 @@ function enhanceTextFormatting(text) {
 }
 
 async function run(textInput, chatHistory) {
-  const chatSession = model.startChat({
-    generationConfig,
-    safetySetting,
-    history: [],
-  });
+  try {
+    // Check if API key is set
+    if (!apiKey) {
+      console.error("API key is missing! Please set VITE_GOOGLE_API_KEY in your .env file");
+      
+      // Return a mock response for testing UI without API key
+      return `<p><strong>This is a mock response since your API key is missing.</strong></p>
+              <p>Your question was: "${textInput}"</p>
+              <p>To fix this issue:</p>
+              <ol>
+                <li>Get a Google Gemini API key from https://makersuite.google.com/app/apikey</li>
+                <li>Create a .env file in your project root</li>
+                <li>Add the line: VITE_GOOGLE_API_KEY=your_api_key_here</li>
+                <li>Restart your development server</li>
+              </ol>`;
+    }
 
-  const result = await chatSession.sendMessage(textInput);
-  const rawText = result.response.text();
-  
-  // Cải thiện định dạng và thêm emoji
-  const enhancedText = enhanceTextFormatting(rawText);
-  
-  return enhancedText;
+    const chatSession = model.startChat({
+      generationConfig,
+      safetySetting,
+      history: [],
+    });
+
+    try {
+      const result = await chatSession.sendMessage(textInput);
+      const rawText = result.response.text();
+      
+      // Cải thiện định dạng và thêm emoji
+      const enhancedText = enhanceTextFormatting(rawText);
+      
+      return enhancedText;
+    } catch (apiError) {
+      console.error("Error calling Gemini API:", apiError);
+      return `<p><strong>Error calling AI service: ${apiError.message}</strong></p>
+              <p>Please check your API key and internet connection.</p>`;
+    }
+  } catch (error) {
+    console.error("Fatal error in Gemini function:", error);
+    return `<p><strong>Something went wrong: ${error.message}</strong></p>`;
+  }
 }
 
 export default run;

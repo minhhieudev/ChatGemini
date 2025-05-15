@@ -1,7 +1,7 @@
 import PropType from "prop-types";
 import IconMenu from "../assets/menu.png";
 import { useDispatch, useSelector } from "react-redux";
-import { addChat, removeChat } from "../store/chatSlice";
+import { addChat, removeChat } from "../store/chatSlice/index";
 import { Link, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { useTheme } from "../context/ThemeContext";
