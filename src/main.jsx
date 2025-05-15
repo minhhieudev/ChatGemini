@@ -7,7 +7,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Provider } from "react-redux";
-import store from "./store/app.js";
+import store, { persistor } from "./store/app.js";
+import { PersistGate } from 'redux-persist/integration/react';
 import "./index.css";
 import ChatDetail from "./pages/ChatDetail.jsx";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -37,7 +38,21 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider>
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <PersistGate 
+          loading={<div className="flex items-center justify-center h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-3">Loading stored data...</p>
+            </div>
+          </div>}
+          persistor={persistor}
+          onBeforeLift={() => {
+            // Optional: Debug persistence
+            console.log("Redux state about to be hydrated");
+          }}
+        >
+          <RouterProvider router={router} />
+        </PersistGate>
       </Provider>
     </ThemeProvider>
   </React.StrictMode>

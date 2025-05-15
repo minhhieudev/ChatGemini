@@ -3,12 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
 
-
-const initData = {
+// Simple initial state - redux-persist will handle loading from localStorage
+const initialState = {
     data: [],
-}
-/*
+};
 
+/*
 data:[
     {
         id: 1,
@@ -20,14 +20,11 @@ data:[
         
     }
 ]
-
-
 */
-
 
 const ChatSlice = createSlice({
     name: 'chat',
-    initialState: initData,
+    initialState,
     reducers:{
         addChat: (state, action) => {
             state.data.push({
@@ -90,6 +87,5 @@ const ChatSlice = createSlice({
 })
 
 export const { addChat, removeChat, addMessage, setNameChat, addUserMessage, addBotMessage } = ChatSlice.actions;
-
 
 export default ChatSlice.reducer;

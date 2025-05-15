@@ -1,22 +1,19 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import ImgTemp from "../assets/temp.jpeg";
-import IconMenu from "../assets/menu.png";
-import SideBar from "../components/SideBar";
-import IconStar from "../assets/star.png";
-import Gemini from "../gemini";
-import { useDispatch, useSelector } from "react-redux";
-import { addMessage, setNameChat, addChat, addUserMessage, addBotMessage, removeChat } from "../store/chatSlice";
-import { v4 as uuidv4 } from "uuid";
-import { useTheme } from "../context/ThemeContext";
-import { IoSend, IoRocket, IoInformation, IoImage, IoCode, IoDocument, IoMic, IoRefresh } from "react-icons/io5";
-import { FaUser, FaCopy, FaCheck, FaEdit, FaFileDownload, FaRegThumbsUp, FaRegThumbsDown } from "react-icons/fa";
-import { RiRobot2Fill, RiHeartLine, RiHeartFill, RiDeleteBin6Line, RiShareLine } from "react-icons/ri";
-import { BiMessageDetail, BiMessageAltDetail, BiExpandAlt, BiCollapseAlt } from "react-icons/bi";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { SiOpenai } from "react-icons/si";
-import UserAvatar from "../assets/nmbvsylxgzcq3uppsfiu.png";
 import { saveAs } from 'file-saver';
+import { useEffect, useRef, useState } from "react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { BiMessageAltDetail, BiMessageDetail } from "react-icons/bi";
+import { FaCheck, FaCopy, FaEdit, FaFileDownload, FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
+import { IoImage, IoMic, IoRefresh, IoSend } from "react-icons/io5";
+import { RiDeleteBin6Line, RiHeartFill, RiHeartLine, RiShareLine } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import IconMenu from "../assets/menu.png";
+import UserAvatar from "../assets/nmbvsylxgzcq3uppsfiu.png";
+import SideBar from "../components/SideBar";
+import { useTheme } from "../context/ThemeContext";
+import Gemini from "../gemini";
+import { addBotMessage, addChat, addUserMessage, removeChat, setNameChat } from "../store/chatSlice";
 const ROBOT_IMG_URL = "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg";
 
 const ChatDetail = () => {
@@ -55,6 +52,24 @@ const ChatDetail = () => {
     }
   }, [data, id]);
 
+  // Kiểm tra và xóa chat rỗng khi điều hướng đi
+  useEffect(() => {
+    // Lưu ID hiện tại để sử dụng trong cleanup function
+    const currentChatId = id;
+    
+    return () => {
+      // Chỉ thực hiện khi điều hướng đi khỏi một chat cụ thể (không phải trang info)
+      if (currentChatId && currentChatId !== 'info') {
+        const chat = data.find(chat => chat.id === currentChatId);
+        // Nếu chat tồn tại và không có tin nhắn nào, xóa nó
+        if (chat && (!chat.messages || chat.messages.length === 0)) {
+          dispatch(removeChat(currentChatId));
+          console.log("Đã xóa cuộc trò chuyện trống:", currentChatId);
+        }
+      }
+    };
+  }, [id, data, dispatch]);
+
   useEffect(() => {
     // Scroll to bottom when new messages arrive
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -76,13 +91,31 @@ const ChatDetail = () => {
     };
   }, [menuToggle]);
 
+  // Debug effect to check if data is properly loaded
+  useEffect(() => {
+    console.log("Chat data from Redux store:", data);
+    // Check localStorage directly
+    const persistedRoot = localStorage.getItem('persist:root');
+    if (persistedRoot) {
+      console.log("Data exists in localStorage:", persistedRoot);
+      try {
+        const parsedData = JSON.parse(persistedRoot);
+        console.log("Parsed localStorage data:", parsedData);
+      } catch (e) {
+        console.error("Error parsing localStorage data:", e);
+      }
+    } else {
+      console.log("No data in localStorage");
+    }
+  }, [data]);
+
   const handleChatDetail = async () => {
     if (!inputChat.trim()) return;
 
     const currentMessage = inputChat;
     setInputChat(""); // Clear input ngay lập tức
 
-    if (id) {
+    if (id && id !== 'info') {
       // Thêm tin nhắn người dùng ngay lập tức
       dispatch(addUserMessage({
         idChat: id,
@@ -116,10 +149,14 @@ const ChatDetail = () => {
 
       setIsLoading(false);
     } else {
+      // Tạo chat mới khi ở trang info hoặc không có id
       const newChatId = uuidv4();
       dispatch(addChat(newChatId));
       
+      // Chờ một chút để đảm bảo chat được tạo
       await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Điều hướng đến chat mới
       navigate(`/chat/${newChatId}`);
       
       // Thêm tin nhắn người dùng
@@ -137,6 +174,7 @@ const ChatDetail = () => {
           botMess: chatText
         }));
         
+        // Đặt tên cho chat mới dựa trên tin nhắn đầu tiên
         const promptName = `This is a new chat, and user ask about ${currentMessage}. No rely and comment just give me a name for this chat, Max length is 10 characters`;
         const newTitle = await Gemini(promptName);
         dispatch(setNameChat({newTitle, chatId: newChatId}));
@@ -459,6 +497,19 @@ const ChatDetail = () => {
                                 >
                                   <FaRegThumbsDown className="w-4 h-4" />
                                 </button>
+                                {item.text.length > 400 && (
+                                  <button 
+                                    onClick={() => toggleMessageExpansion(item.id)}
+                                    className={`p-1.5 rounded-full transition-colors ${
+                                      isDarkMode 
+                                        ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-700' 
+                                        : 'text-gray-500 hover:text-blue-500 hover:bg-gray-200'
+                                    }`}
+                                    title={expandedMessages[item.id] ? "Thu gọn" : "Xem thêm"}
+                                  >
+                                    {expandedMessages[item.id] ? "Thu gọn" : "Xem thêm"}
+                                  </button>
+                                )}
                               </div>
                               
                               <div className="flex space-x-2">
@@ -764,16 +815,86 @@ const ChatDetail = () => {
                   </div>
                 ))}
               </div>
-
-              <div className={`p-5 rounded-xl shadow-sm text-center ${
-                isDarkMode ? 'bg-gray-800/50 border border-gray-700' : 'bg-blue-50 border border-blue-100'
+              
+              {/* Add new chat input field directly on the home screen */}
+              <div className={`max-w-3xl mx-auto w-full mt-8 rounded-xl shadow-md p-5 ${
+                isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
               }`}>
-                <div className="flex items-center justify-center mb-3">
-                  <IoInformation className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />
+                <div className="flex items-center gap-2 mb-4">
+                  <div className={`p-2 rounded-full ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
+                    <BiMessageAltDetail className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+                    Bắt đầu cuộc trò chuyện mới
+                  </p>
                 </div>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Gemini AI có thể mắc lỗi. Hãy xem xét những thông tin quan trọng và kiểm tra nội dung nhạy cảm.
-                </p>
+                <div className="relative mb-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative flex-1">
+                      <textarea
+                        value={inputChat}
+                        placeholder="Hỏi tôi bất cứ điều gì..."
+                        rows={1}
+                        className={`w-full py-3 px-4 rounded-xl resize-none transition-all duration-200 ${
+                          isDarkMode 
+                            ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400 focus:border-blue-500' 
+                            : 'bg-gray-50 text-gray-800 border-gray-200 placeholder-gray-500 focus:border-blue-400'
+                        } border focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-400`}
+                        onChange={(e) => setInputChat(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        style={{
+                          minHeight: '50px',
+                          maxHeight: '120px',
+                          height: 'auto'
+                        }}
+                        onInput={e => {
+                          e.target.style.height = 'auto';
+                          e.target.style.height = (e.target.scrollHeight < 120 ? e.target.scrollHeight : 120) + 'px';
+                        }}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex space-x-1">
+                        <button 
+                          onClick={handleFileUpload}
+                          className={`p-1.5 rounded-full transition-colors ${
+                            isDarkMode ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-700' : 'text-gray-500 hover:text-blue-500 hover:bg-gray-100'
+                          }`}
+                          title="Tải lên hình ảnh"
+                        >
+                          <IoImage className="w-5 h-5" />
+                        </button>
+                        <button 
+                          className={`p-1.5 rounded-full transition-colors ${
+                            isDarkMode ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-700' : 'text-gray-500 hover:text-blue-500 hover:bg-gray-100'
+                          }`}
+                          title="Microphone"
+                        >
+                          <IoMic className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      className={`p-3 rounded-xl transition-all duration-300 transform ${
+                        inputChat.trim() 
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-95 text-white shadow-md hover:shadow-blue-500/30' 
+                          : isDarkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-200 text-gray-400'
+                      } ${!inputChat.trim() && 'cursor-not-allowed'}`}
+                      onClick={handleChatDetail}
+                      disabled={!inputChat.trim()}
+                    >
+                      <IoSend className={`w-5 h-5 ${
+                        inputChat.trim() ? 'transform rotate-0' : 'rotate-[-45deg]'
+                      } transition-transform duration-300`} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Nhấn Enter để gửi, Shift+Enter để xuống dòng
+                  </p>
+                  <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Được hỗ trợ bởi Gemini AI
+                  </p>
+                </div>
               </div>
             </div>
           </div>

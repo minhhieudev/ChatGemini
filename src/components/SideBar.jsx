@@ -1,14 +1,10 @@
 import PropType from "prop-types";
-import IconPlus from "../assets/plusIcon.png";
-import IconChat from "../assets/chat.png";
-import IconTrash from "../assets/remove.png";
 import IconMenu from "../assets/menu.png";
 import { useDispatch, useSelector } from "react-redux";
 import { addChat, removeChat } from "../store/chatSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { useTheme } from "../context/ThemeContext";
-import DOMPurify from 'dompurify';
 import { FaPlus, FaTrash, FaRobot, FaGhost, FaBrain, FaBook, FaCode, FaMusic, FaQuestion } from 'react-icons/fa';
 import { SiOpenai } from "react-icons/si";
 import { IoMdSunny, IoMdMoon } from "react-icons/io";
@@ -38,6 +34,17 @@ const SideBar = ({ onToggle }) => {
   const { isDarkMode, toggleTheme } = useTheme();
 
   const handleNewChat = () => {
+    // Kiểm tra và xóa các chat trống trước khi tạo mới
+    const emptyChatIds = data
+      .filter(chat => !chat.messages || chat.messages.length === 0)
+      .map(chat => chat.id);
+    
+    // Xóa tất cả các chat trống
+    emptyChatIds.forEach(id => {
+      dispatch(removeChat(id));
+    });
+    
+    // Tạo chat mới
     const newChatId = uuidv4();
     dispatch(addChat(newChatId));
     navigate(`/chat/${newChatId}`);
