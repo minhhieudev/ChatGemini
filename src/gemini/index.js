@@ -12,6 +12,7 @@ import {GoogleGenerativeAI,
     HarmBlockThreshold} from "@google/generative-ai";
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
+import { createOptimizedPrompt } from './phuyen-prompt';
   
 const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
@@ -65,7 +66,7 @@ const emojiMap = {
   'ý tưởng': '💡',
   'thông tin': 'ℹ️',
   'video': '🎥',
-  'âm nhạc': '🎵',
+  'nhạc': '🎵',
   'tiền': '💰',
   'thời gian': '⏰',
   'địa điểm': '📍',
@@ -135,7 +136,6 @@ const emojiMap = {
   'âm nhạc': '🎵',
   'guitar': '🎸',
   'piano': '🎹',
-  'nhạc': '🎼',
   'nghệ thuật': '🎨',
   'phim': '🎬',
   'game': '🎮',
@@ -169,6 +169,19 @@ const emojiMap = {
   'câu hỏi': '❓',
   'hỏi': '❓',
   'trả lời': '💬',
+  // Thêm từ khóa liên quan đến giáo dục và đại học
+  'đại học': '🏛️',
+  'trường học': '🏫',
+  'tuyển sinh': '📝',
+  'ngành học': '📚',
+  'sinh viên': '👨‍🎓',
+  'học phí': '💰',
+  'điểm chuẩn': '📊',
+  'tốt nghiệp': '🎓',
+  'khoa': '🏛️',
+  'ký túc xá': '🏠',
+  'phú yên': '🌊',
+  'học bổng': '🏆',
 };
 
 // Hàm để thêm emoji vào văn bản
@@ -237,7 +250,10 @@ async function run(textInput, chatHistory) {
     });
 
     try {
-      const result = await chatSession.sendMessage(textInput);
+      // Tạo prompt tối ưu cho chatbot tư vấn tuyển sinh
+      const optimizedPrompt = createOptimizedPrompt(textInput, chatHistory);
+      
+      const result = await chatSession.sendMessage(optimizedPrompt);
       const rawText = result.response.text();
       
       // Cải thiện định dạng và thêm emoji
@@ -250,8 +266,8 @@ async function run(textInput, chatHistory) {
               <p>Please check your API key and internet connection.</p>`;
     }
   } catch (error) {
-    console.error("Fatal error in Gemini function:", error);
-    return `<p><strong>Something went wrong: ${error.message}</strong></p>`;
+    console.error("General error:", error);
+    return `<p><strong>An error occurred: ${error.message}</strong></p>`;
   }
 }
 
