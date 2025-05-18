@@ -132,10 +132,10 @@ const ChatDetail = () => {
   const sidebarRef = useRef(null);
   const messagesEndRef = useRef(null);
   const suggestedPrompts = [
-    "Quy chế tuyển sinh năm 2024 của trường Đại học Phú Yên",
+    "Quy chế tuyển sinh năm 2025 của trường Đại học Phú Yên",
     "Chỉ tiêu tuyển sinh các ngành đào tạo",
     "Ngành Quản trị kinh doanh có những chuyên ngành nào?",
-    "Học phí các ngành đào tạo năm 2024"
+    "Học phí các ngành đào tạo năm 2025"
   ];
 
   useEffect(() => {
@@ -235,47 +235,33 @@ const ChatDetail = () => {
         if (dataDetail.title === 'Chat') {
           try {
             // Use a simpler, more direct prompt for better title generation
-            const promptName = `Tạo một tiêu đề ngắn gọn (2-3 từ) cho cuộc trò chuyện có nội dung: "${currentMessage}". Chỉ trả về tiêu đề, không giải thích gì thêm.`;
+            const promptName = `Tóm tắt nội dung cuộc trò chuyện sau thành một tiêu đề ngắn gọn, rõ ý (4-7 từ, ít nhất 4 từ, không được chỉ trả về 1 từ), không giải thích gì thêm. Ví dụ: "Học phí ngành Công nghệ thông tin năm 2024", "Điều kiện xét tuyển Đại học Phú Yên". Nội dung: "${currentMessage}"`;
             let newTitle = await Gemini(promptName);
             
-            // Basic cleanup
-            newTitle = newTitle.trim();
-            
             // Remove quotes that often appear in responses
-            newTitle = newTitle.replace(/["']/g, '');
+            newTitle = newTitle.replace(/["']/g, '').trim();
             
-            // If response contains multiple lines, take only the first line
+            // Nếu có nhiều dòng, lấy dòng đầu tiên
             if (newTitle.includes('\n')) {
               newTitle = newTitle.split('\n')[0].trim();
             }
             
-            // Use a more generous max length but still avoid cutting off words
-            const maxLength = 20;
+            // Kiểm tra số từ
+            let words = newTitle.split(/\s+/).filter(Boolean);
             let cleanTitle = newTitle;
             
-            if (newTitle.length > maxLength && newTitle.indexOf(' ', 0) !== -1) {
-              // Find the last space before or at maxLength
-              const lastSpaceIndex = newTitle.lastIndexOf(' ', maxLength);
-              cleanTitle = lastSpaceIndex !== -1 ? 
-                newTitle.substring(0, lastSpaceIndex) : 
-                newTitle.substring(0, maxLength);
-            }
-            
-            // Only use fallback if title is really empty
-            if (!cleanTitle || cleanTitle.length < 2) {
-              // Create a simple title based on first few words of message
-              const words = currentMessage.split(' ');
-              cleanTitle = words.slice(0, 3).join(' ');
-              
-              // If still empty, use first 15 chars of message
+            if (words.length < 4) {
+              // Fallback: lấy 4-7 từ đầu của message
+              let msgWords = currentMessage.split(/\s+/).filter(Boolean);
+              cleanTitle = msgWords.slice(0, 7).join(' ');
               if (!cleanTitle || cleanTitle.length < 2) {
                 cleanTitle = currentMessage.substring(0, 15);
               }
-              
-              // Last resort fallback
               if (!cleanTitle || cleanTitle.length < 2) {
                 cleanTitle = "Chat " + (new Date()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
               }
+            } else if (words.length > 7) {
+              cleanTitle = words.slice(0, 7).join(' ');
             }
             
             console.log("Generated chat title:", cleanTitle);
@@ -385,47 +371,33 @@ const ChatDetail = () => {
           // Đặt tên cho chat mới
           try {
             // Use a simpler, more direct prompt for better title generation
-            const promptName = `Tạo một tiêu đề ngắn gọn (2-3 từ) cho cuộc trò chuyện có nội dung: "${currentMessage}". Chỉ trả về tiêu đề, không giải thích gì thêm.`;
+            const promptName = `Tóm tắt nội dung cuộc trò chuyện sau thành một tiêu đề ngắn gọn, rõ ý (4-7 từ, ít nhất 4 từ, không được chỉ trả về 1 từ), không giải thích gì thêm. Ví dụ: "Học phí ngành Công nghệ thông tin năm 2024", "Điều kiện xét tuyển Đại học Phú Yên". Nội dung: "${currentMessage}"`;
             let newTitle = await Gemini(promptName);
             
-            // Basic cleanup
-            newTitle = newTitle.trim();
-            
             // Remove quotes that often appear in responses
-            newTitle = newTitle.replace(/["']/g, '');
+            newTitle = newTitle.replace(/["']/g, '').trim();
             
-            // If response contains multiple lines, take only the first line
+            // Nếu có nhiều dòng, lấy dòng đầu tiên
             if (newTitle.includes('\n')) {
               newTitle = newTitle.split('\n')[0].trim();
             }
             
-            // Use a more generous max length but still avoid cutting off words
-            const maxLength = 20;
+            // Kiểm tra số từ
+            let words = newTitle.split(/\s+/).filter(Boolean);
             let cleanTitle = newTitle;
             
-            if (newTitle.length > maxLength && newTitle.indexOf(' ', 0) !== -1) {
-              // Find the last space before or at maxLength
-              const lastSpaceIndex = newTitle.lastIndexOf(' ', maxLength);
-              cleanTitle = lastSpaceIndex !== -1 ? 
-                newTitle.substring(0, lastSpaceIndex) : 
-                newTitle.substring(0, maxLength);
-            }
-            
-            // Only use fallback if title is really empty
-            if (!cleanTitle || cleanTitle.length < 2) {
-              // Create a simple title based on first few words of message
-              const words = currentMessage.split(' ');
-              cleanTitle = words.slice(0, 3).join(' ');
-              
-              // If still empty, use first 15 chars of message
+            if (words.length < 4) {
+              // Fallback: lấy 4-7 từ đầu của message
+              let msgWords = currentMessage.split(/\s+/).filter(Boolean);
+              cleanTitle = msgWords.slice(0, 7).join(' ');
               if (!cleanTitle || cleanTitle.length < 2) {
                 cleanTitle = currentMessage.substring(0, 15);
               }
-              
-              // Last resort fallback
               if (!cleanTitle || cleanTitle.length < 2) {
                 cleanTitle = "Chat " + (new Date()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
               }
+            } else if (words.length > 7) {
+              cleanTitle = words.slice(0, 7).join(' ');
             }
             
             console.log("Generated chat title:", cleanTitle);
@@ -688,9 +660,9 @@ const ChatDetail = () => {
                 {[
                   { 
                     title: "Tuyển sinh", 
-                    desc: "Thông tin về kỳ tuyển sinh năm 2024", 
+                    desc: "Thông tin về kỳ tuyển sinh năm 2025", 
                     icon: "🎓",
-                    prompt: "Thông tin tuyển sinh Đại học Phú Yên năm 2024"
+                    prompt: "Thông tin tuyển sinh Đại học Phú Yên năm 2025"
                   },
                   { 
                     title: "Ngành học", 
@@ -702,7 +674,7 @@ const ChatDetail = () => {
                     title: "Học phí", 
                     desc: "Chi phí học tập và học bổng", 
                     icon: "💰",
-                    prompt: "Học phí các ngành đào tạo năm 2024 của Đại học Phú Yên"
+                    prompt: "Học phí các ngành đào tạo năm 2025 của Đại học Phú Yên"
                   },
                   { 
                     title: "Điểm chuẩn", 

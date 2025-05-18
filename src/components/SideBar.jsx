@@ -34,20 +34,22 @@ const SideBar = ({ onToggle }) => {
   const { isDarkMode, toggleTheme } = useTheme();
 
   const handleNewChat = () => {
-    // Kiểm tra và xóa các chat trống trước khi tạo mới
-    const emptyChatIds = data
-      .filter(chat => !chat.messages || chat.messages.length === 0)
-      .map(chat => chat.id);
+    navigate('/')
+
+    // // Kiểm tra và xóa các chat trống trước khi tạo mới
+    // const emptyChatIds = data
+    //   .filter(chat => !chat.messages || chat.messages.length === 0)
+    //   .map(chat => chat.id);
     
-    // Xóa tất cả các chat trống
-    emptyChatIds.forEach(id => {
-      dispatch(removeChat(id));
-    });
+    // // Xóa tất cả các chat trống
+    // emptyChatIds.forEach(id => {
+    //   dispatch(removeChat(id));
+    // });
     
-    // Tạo chat mới
-    const newChatId = uuidv4();
-    dispatch(addChat(newChatId));
-    navigate(`/chat/${newChatId}`);
+    // // Tạo chat mới
+    // const newChatId = uuidv4();
+    // dispatch(addChat(newChatId));
+    // navigate(`/chat/${newChatId}`);
   };
 
   const handleRemoveChat = (id) => {
@@ -56,7 +58,7 @@ const SideBar = ({ onToggle }) => {
   };
 
   return (
-    <div className={`w-[280px] h-screen flex flex-col ${
+    <div className={`w-[280px] h-screen flex flex-col z-[9999] ${
       isDarkMode 
         ? 'bg-gradient-to-b from-blue-900 to-blue-800 text-white' 
         : 'bg-gradient-to-b from-blue-50 to-blue-100 text-gray-800'
@@ -70,7 +72,7 @@ const SideBar = ({ onToggle }) => {
             <img src={logoImg} alt="Logo ĐH Phú Yên" className="w-10 h-10 rounded-full shadow-md border-2 border-blue-500 bg-white" />
             <div className="flex flex-col">
               <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text leading-tight">ĐẠI HỌC PHÚ YÊN</span>
-              <span className="text-xs text-blue-500 font-semibold tracking-wide">Tư vấn tuyển sinh 2024</span>
+              <span className="text-xs text-blue-500 font-semibold tracking-wide">Tư vấn tuyển sinh 2025</span>
             </div>
           </div>
           <button 
@@ -157,7 +159,7 @@ const SideBar = ({ onToggle }) => {
         <div className={`rounded-lg text-xs text-center ${
           isDarkMode ? 'text-gray-400' : 'text-gray-500'
         }`}>
-          <p>© 2024 Đại học Phú Yên • Tư vấn tuyển sinh</p>
+          <p>© 2025 Đại học Phú Yên • Tư vấn tuyển sinh</p>
         </div>
       </div>
     </div>
